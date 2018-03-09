@@ -1,13 +1,82 @@
 from display import *
 from matrix import *
 
+def make_h_inverse():
+    mat = new_matrix(rows=4, cols=4)
+    # Note: Indexed by column, then by rows
+    mat[0][0] = 2
+    mat[1][0] = -2
+    mat[2][0] = 1
+    mat[3][0] = 1
 
-def add_circle( points, cx, cy, cz, r, step ):
+    mat[0][1] = -3
+    mat[1][1] = 3
+    mat[2][1] = -2
+    mat[3][1] = -1
+
+    mat[0][2] = 0
+    mat[1][2] = 0
+    mat[2][2] = 1
+    mat[3][2] = 0
+
+    mat[0][3] = 1
+    mat[1][3] = 0
+    mat[2][3] = 0
+    mat[3][3] = 0
+    
+    return mat
+
+def make_b():
+    mat = new_matrix(rows=4, cols=4)
+
+    mat[0][0] = 1
+    mat[1][0] = 3
+    mat[2][0] = -3
+    mat[3][0] = 1
+    
+    mat[0][1] = 3
+    mat[1][1] = -6
+    mat[2][1] = 3
+    mat[3][1] = 0
+    
+    mat[0][2] = -3
+    mat[1][2] = 3
+    mat[2][2] = 0
+    mat[3][2] = 0
+
+    mat[0][3] = 1
+    mat[1][3] = 0
+    mat[2][3] = 0
+    mat[3][3] = 0
+
+    return mat
+
+H_INV = make_h_inverse()
+B = make_b()
+
+def make_curve_coefs(numbers, curve_type):
+    vec = new_matrix(rows=4, cols=1)
+    vec[0][0] = numbers[0]
+    vec[0][1] = numbers[1]
+    vec[0][2] = numbers[2]
+    vec[0][3] = numbers[3]
+    
+    if curve_type == 'hermite':
+        matrix_mult(H_INV, vec)
+        return vec
+    elif curve_type == 'bezier':
+        matrix_mult(B, vec)
+        return vec
+
+def add_circle( points, numbers, step=0.01):
     pass
 
-def add_curve( points, x0, y0, x1, y1, x2, y2, x3, y3, step, curve_type ):
-    pass
-
+def add_curve( points, curve_type, numbers, step=0.01):
+    x0, y0, x1, y1, rx0, ry0, rx1, ry1 = numbers
+    xnumbers = [x0, x1, rx0, rx1]
+    ynumbers = [y0, y1, ry0, ry1]
+    xcoefs = make_curve_coefs(xnumbers, curve_type)
+    ycoefs = make_curve_coefs(ynumbers, curve_type)
 
 
 def draw_lines( matrix, screen, color ):
