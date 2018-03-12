@@ -1,3 +1,5 @@
+import math
+
 from display import *
 from matrix import *
 
@@ -56,10 +58,7 @@ B = make_b()
 
 def make_curve_coefs(numbers, curve_type):
     vec = new_matrix(rows=4, cols=1)
-    vec[0][0] = numbers[0]
-    vec[0][1] = numbers[1]
-    vec[0][2] = numbers[2]
-    vec[0][3] = numbers[3]
+    vec[0] = numbers[:]
     
     if curve_type == 'hermite':
         matrix_mult(H_INV, vec)
@@ -69,14 +68,32 @@ def make_curve_coefs(numbers, curve_type):
         return vec
 
 def add_circle( points, numbers, step=0.01):
-    pass
+    cx, cy, cz, r = numbers
+    t = 0
+    prev_x, prev_y = r * 1 + cx, r * 0 + cy
+    while t <= 1:
+        theta = 2 * math.pi * t
+        x = r * math.cos(theta) + cx
+        y = r * math.sin(theta) + cy
+        add_edge(points, x0=prev_x, y0=prev_y, z0=cz, x1=x, y1=y, z1=cz)
+        prev_x, prev_y = x, y
+        
 
 def add_curve( points, curve_type, numbers, step=0.01):
     x0, y0, x1, y1, rx0, ry0, rx1, ry1 = numbers
     xnumbers = [x0, x1, rx0, rx1]
     ynumbers = [y0, y1, ry0, ry1]
-    xcoefs = make_curve_coefs(xnumbers, curve_type)
-    ycoefs = make_curve_coefs(ynumbers, curve_type)
+    xcoefs = make_curve_coefs(xnumbers, curve_type)[0]
+    ycoefs = make_curve_coefs(ynumbers, curve_type)[0]
+    
+    t = 0
+    prev_x, prev_y = x0, y0
+    while t <= 1:
+        x = xcoefs[0] * (t**3) + xcoefs[1] * (t**2) + xcoefs[2] * (t) + xcoefs[3]
+        y = ycoefs[0] * (t**3) + ycoefs[1] * (t**2) + ycoefs[2] * (t) + ycoefs[3]
+        add_edge(points, x0=prev_x, y0=prev_y, z0=0, x1=x, y1=y, z1=0)
+        prev_x, prev_y = x, y
+        t += step
 
 
 def draw_lines( matrix, screen, color ):
